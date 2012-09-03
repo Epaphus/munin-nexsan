@@ -1,0 +1,271 @@
+#!/usr/bin/env ruby
+require 'rubygems'
+require 'xml/libxml'
+require 'net/http'
+
+# Ver 1.0
+# 28 Aug 2012
+# David Wilkinson - C4L
+
+@host = ENV.member?('host') ? ENV['host']: "127.0.0.1"
+@port = ENV.member?('port') ? ENV['port']: 80
+@request = ENV.member?('request') ? ENV['request']: "/admin/opstats.asp"
+@user = ENV.member?('user') ? ENV['user']: "ADMIN"
+@password = ENV.member?('password') ? ENV['password']: "password"
+@timeout = ENV.member?('timeout') ? ENV['timeout']: 30
+
+# http request
+def getstat()
+   Net::HTTP.start(@host, @port) do |http|
+        http.open_timeout = @timeout
+       req = Net::HTTP::Get.new(@request)
+        req.basic_auth @user, @password
+        response = http.request(req)
+        response.value()
+    return response.body
+    end rescue begin
+	puts "Something wrong with HTTP request"
+        return false
+    end
+end
+
+begin
+	doc = XML::Document.string(getstat())
+end rescue begin
+    puts "Parse error"
+	puts doc
+    exit 1
+end
+
+#doc = XML::Document.file("data.xml")
+
+
+def autoconf()
+    begin
+        if getstat()
+            puts "yes"
+            return 0
+        else
+            puts "no"
+            return 1
+        end
+    rescue
+        puts "no (#{$!})"
+        return 1
+    end
+end
+
+# munin config request
+if ARGV[0] == "config"
+
+	# PSU Temp
+	puts "multigraph nexsan_psutemp"
+	puts "graph_title PSU Temperature"
+	puts "graph_category Nexsan"
+	puts "graph_vlabel Deg C"
+	puts "psu_temp0.label PSU 0"
+	puts "psu_temp1.label PSU 1"
+	puts "psu_temp0.draw LINE1"
+	puts "psu_temp1.draw LINE1"
+	puts ""
+
+	# PSU Fans
+	doc.find('//nexsan_op_status/nexsan_env_status/psu').each do |node|
+
+		puts "multigraph nexsan_psufan_#{node['id']}"
+
+		crtlid = node['id']
+
+		puts "graph_title PSU #{node['id']} Fans"
+		puts "graph_category Nexsan"
+		puts "graph_vlabel RPM"
+
+		doc.find('//nexsan_op_status/nexsan_env_status/psu/blower_rpm').each do |node|
+			if crtlid == node.parent['id']
+			puts "blower#{node['id']}.label Blower #{node['id']}"
+			puts "blower#{node['id']}.draw LINE1"
+			end
+		end
+		puts ""
+	end
+
+	# Front Panel Fan
+	puts "multigraph nexsan_frontpanel"
+	puts "graph_title Front Panel Fan"
+	puts "graph_category Nexsan"
+	puts "graph_vlabel RPM"
+	puts "blower0.label Blower 0"
+	puts "blower0.draw LINE1"
+	puts ""
+
+	# Fan tray Fans
+	puts "multigraph nexsan_fantray"
+	puts "graph_title Fan Tray Fans"
+	puts "graph_category Nexsan"
+	puts "graph_vlabel RPM"
+	puts "blower0.label Blower 0"
+	puts "blower0.draw LINE1"
+	puts "blower1.label Blower 1"
+	puts "blower1.draw LINE1"
+	puts "blower2.label Blower 2"
+	puts "blower2.draw LINE1"
+	puts "blower3.label Blower 3"
+	puts "blower3.draw LINE1"
+	puts ""
+
+	# Controller Volts
+	doc.find('//nexsan_op_status/nexsan_env_status/controller').each do |node|
+        	puts "multigraph nexsan_controllervolt_#{node['id']}"
+		crtlid = node['id']
+
+		puts "graph_title Controller #{node['id']} Volts"
+		puts "graph_category Nexsan"
+		puts "graph_vlabel Volts"
+
+		doc.find('//nexsan_op_status/nexsan_env_status/controller/voltage').each do |node|
+	                if crtlid == node.parent['id']
+				puts "volt#{node['id']}.label #{node['id']}"
+				puts "volt#{node['id']}.draw LINE1"
+			end
+	        end
+	        puts ""
+	end
+
+	# Controller Temp
+	puts "multigraph nexsan_controllertemp"
+	puts "graph_title Controller Temperature"
+	puts "graph_category Nexsan"
+	puts "graph_vlabel Deg C"
+	doc.find('//nexsan_op_status/nexsan_env_status/controller').each do |node|
+		puts "crtl#{node['id']}_temp.label Controller #{node['id']}"
+		puts "crtl#{node['id']}_temp.draw LINE1"
+	end
+	puts ""
+
+	# Controller CPU
+	puts "multigraph nexsan_controllercpu"
+	puts "graph_title Controller CPU Usage"
+	puts "graph_category Nexsan"
+	puts "graph_vlabel Percent"
+	doc.find('//nexsan_op_status/nexsan_perf_status/controller').each do |node|
+        	puts "crtl#{node['id']}_cpu.label Controller #{node['id']}"
+        	puts "crtl#{node['id']}_cpu.draw LINE1"
+	end
+	puts ""
+
+	# Controller Mem
+        puts "multigraph nexsan_controllermem"
+	puts "graph_title Controller Memory Usage"
+	puts "graph_category Nexsan"
+	puts "graph_vlabel Percent"
+	doc.find('//nexsan_op_status/nexsan_perf_status/controller').each do |node|
+		puts "crtl#{node['id']}_mem.label Controller #{node['id']}"
+		puts "crtl#{node['id']}_mem.draw LINE1"
+	end
+	puts ""
+
+	# Controller Mem
+	puts "multigraph nexsan_arrayload"
+	puts "graph_title Controller Array Load"
+	puts "graph_category Nexsan"
+	puts "graph_vlabel Percent"
+	doc.find('//nexsan_op_status/nexsan_perf_status/array').each do |node|
+		puts "#{node['name']}_load.label #{node['name']}"
+		puts "#{node['name']}_load.draw LINE1"
+	end
+	puts ""
+
+	exit 0
+end
+
+
+
+
+# PSU temp
+puts "multigraph nexsan_psutemp"
+doc.find('//nexsan_op_status/nexsan_env_status/psu').each do |node|
+		puts "psu_temp#{node['id']}.value #{node.find('temperature_deg_c').to_a.first.content}" 
+end
+puts ""
+
+# PSU Fan
+doc.find('//nexsan_op_status/nexsan_env_status/psu').each do |node|
+	puts "multigraph nexsan_psufan_#{node['id']}"
+	crtlid = node['id']
+	doc.find('//nexsan_op_status/nexsan_env_status/psu/blower_rpm').each do |node|
+		if crtlid == node.parent['id']
+		puts "blower#{node['id']}.value #{node.content}" 
+		end
+	end
+	puts ""
+end
+
+#front panel
+puts "multigraph nexsan_frontpanel"
+doc.find('//nexsan_op_status/nexsan_env_status/front_panel/blower_rpm').each do |node|
+        puts "blower#{node['id']}.value #{node.content}" 
+end
+puts ""
+
+# Fan Tray
+puts "multigraph nexsan_fantray"
+doc.find('//nexsan_op_status/nexsan_env_status/fan_tray/blower_rpm').each do |node|
+                puts "blower#{node['id']}.value #{node.content}"
+end
+puts ""
+
+
+# Controller volts
+doc.find('//nexsan_op_status/nexsan_env_status/controller').each do |node|
+        puts "multigraph nexsan_controllervolt_#{node['id']}"
+	crtlid = node['id']
+	doc.find('//nexsan_op_status/nexsan_env_status/controller/voltage').each do |node|
+                if crtlid == node.parent['id']
+			puts "volt#{node['id']}.value #{node.content}"
+		end
+        end
+        puts ""
+end
+
+# Controller temp
+puts "multigraph nexsan_controllertemp"
+doc.find('//nexsan_op_status/nexsan_env_status/controller').each do |node|
+                puts "crtl#{node['id']}_temp.value #{node.find('temperature_deg_c').to_a.first.content}"
+end
+puts ""
+
+# Controller cpu
+puts "multigraph nexsan_controllercpu"
+doc.find('//nexsan_op_status/nexsan_perf_status/controller').each do |node|
+	puts "crtl#{node['id']}_cpu.value #{node.find('cpu_percent').to_a.first.content}"
+end
+        puts ""
+
+# Controller Memory
+puts "multigraph nexsan_controllermem"
+doc.find('//nexsan_op_status/nexsan_perf_status/controller').each do |node|
+	puts "crtl#{node['id']}_mem.value #{node.find('memory_percent').to_a.first.content}"
+end
+puts ""
+
+
+
+# Array loads
+puts "multigraph nexsan_arrayload"
+doc.find('//nexsan_op_status/nexsan_perf_status/array').each do |node|
+	puts "#{node['name']}_load.value #{node.find('load_percent').to_a.first.content}"
+
+end 
+puts ""
+
+# Port stats
+doc.find('//nexsan_op_status/nexsan_perf_status/controller').each do |node|
+	crtlid = node['id']
+	doc.find('//nexsan_op_status/nexsan_env_status/controller/port').each do |node|
+        puts "multigraph nexsan_controllerport.controller#{node['id']}"
+                if crtlid == node.parent['id']
+			puts "port_#{node['id']}.value #{node.content}"
+		end
+        end
+        puts ""
+end
