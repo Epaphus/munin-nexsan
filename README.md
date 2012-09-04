@@ -31,15 +31,15 @@ data.xml - Example data to work with
 
 The plugin currently gets the following information
 
-Controller CPU usage
-Controller Memory Usage
-Controller Voltages
-PSU Temp
-PSU Fan speeds
-Fan tray fan speeds
-Front panel fan speeds
-Array loads
-Port stats - MB/sec - IO/sec - Blocks/sec
+* Controller CPU usage
+* Controller Memory Usage
+* Controller Voltages
+* PSU Temp
+* PSU Fan speeds
+* Fan tray fan speeds
+* Front panel fan speeds
+* Array loads
+* Port stats - MB/sec - IO/sec - Blocks/sec
 
 
 Still To Do
