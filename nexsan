@@ -3,7 +3,7 @@ require 'rubygems'
 require 'xml/libxml'
 require 'net/http'
 
-# Ver 1.1
+# Ver 1.11
 # 28 Aug 2012
 # David Wilkinson - C4L
 
@@ -179,56 +179,63 @@ if ARGV[0] == "config"
 	# Port stats - mbytes
 	doc.find('//nexsan_op_status/nexsan_perf_status/controller').each do |node|
 		crtlid = node['id']
+		puts "multigraph nexsan_portstats_mbytes_crtl#{crtlid}"
+		puts "graph_title MBytes sec - Controller #{crtlid}"
+		puts "graph_category Nexsan"
+		puts "graph_vlabel MBytes/sec read (-) / write (+)"
 		doc.find('//nexsan_op_status/nexsan_perf_status/controller/port').each do |node|
 			if crtlid == node.parent['id']
 				portname = node['name']
 				nodename = node['name'].gsub!(' ', '_')
 				nodename = nodename.gsub!('-', '')
 				nodename = nodename.gsub!('__', '_')
-				puts "multigraph nexsan_portstats_crtl#{crtlid}_mbytes_#{nodename}"
-				puts "graph_title MB sec - Controller #{crtlid} - Port #{portname}"
-				puts "graph_category Nexsan"
-				puts "graph_vlabel MB sec"
 				portdata = node.parent
 				portdata.find('.//read_mbytes_per_sec').each do |node|
 					if portname == node.parent['name']
-						puts "read_mbytes_#{nodename}.label Read MB sec"
+						puts "read_mbytes_#{nodename}.label #{portname}"
 						puts "read_mbytes_#{nodename}.draw LINE1"
+						puts "read_mbytes_#{nodename}.type GAUGE"
+						puts "read_mbytes_#{nodename}.min 0"
+						puts "read_mbytes_#{nodename}.graph no"
 					end
 				end
 	
 				portdata.find('.//write_mbytes_per_sec').each do |node|
 					if portname == node.parent['name']
-						puts "write_mbytes_#{nodename}.label Write MB sec"
+						puts "write_mbytes_#{nodename}.label #{portname}"
 						puts "write_mbytes_#{nodename}.draw LINE1"
+						puts "write_mbytes_#{nodename}.type GAUGE"
+						puts "write_mbytes_#{nodename}.min 0"
+						puts "write_mbytes_#{nodename}.negative read_mbytes_#{nodename}"
 	                                end
 	
 	                        end
-	                        puts ""
 	
 	                end
 	        end
+		puts ""
 	end
 
 	# Port stats - ios
 	doc.find('//nexsan_op_status/nexsan_perf_status/controller').each do |node|
 		crtlid = node['id']
+		puts "multigraph nexsan_portstats_ios_crtl#{crtlid}"
+		puts "graph_title IO sec - Controller #{crtlid}"
+		puts "graph_category Nexsan"
+		puts "graph_vlabel Port IOs read (-) / write (+)"
 		doc.find('//nexsan_op_status/nexsan_perf_status/controller/port').each do |node|
 			if crtlid == node.parent['id']
 				portname = node['name']
 				nodename = node['name'].gsub!(' ', '_')
 				nodename = nodename.gsub!('-', '')
 				nodename = nodename.gsub!('__', '_')
-				puts "multigraph nexsan_portstats_crtl#{crtlid}_ios_#{nodename}"
-				puts "graph_title IO sec - Controller #{crtlid} - Port #{portname}"
-				puts "graph_category Nexsan"
-				puts "graph_vlabel IO sec"
 				portdata = node.parent
 				portdata.find('.//read_ios').each do |node|
 					if portname == node.parent['name']
 						puts "read_ios_#{nodename}.label Read IO sec"
 						puts "read_ios_#{nodename}.draw LINE1"
 						puts "read_ios_#{nodename}.type COUNTER"
+						puts "read_ios_#{nodename}.graph no"
 					end
 				end
 	
@@ -237,33 +244,38 @@ if ARGV[0] == "config"
 						puts "write_ios_#{nodename}.label Write IO sec"
 						puts "write_ios_#{nodename}.draw LINE1"
 						puts "write_ios_#{nodename}.type COUNTER"
+						puts "write_ios_#{nodename}.negative read_ios_#{nodename}"
 	                                end
 	
 	                        end
-	                        puts ""
 	
 	                end
 	        end
+		puts ""
 	end
+
+
 	# Port stats - Blocks
 	doc.find('//nexsan_op_status/nexsan_perf_status/controller').each do |node|
 		crtlid = node['id']
+		puts "multigraph nexsan_portstats_blocks_crtl#{crtlid}"
+		puts "graph_title Blocks sec - Controller #{crtlid}"
+		puts "graph_category Nexsan"
+		puts "graph_vlabel Blocks sec"
+		
 		doc.find('//nexsan_op_status/nexsan_perf_status/controller/port').each do |node|
 			if crtlid == node.parent['id']
 				portname = node['name']
 				nodename = node['name'].gsub!(' ', '_')
 				nodename = nodename.gsub!('-', '')
 				nodename = nodename.gsub!('__', '_')
-				puts "multigraph nexsan_portstats_crtl#{crtlid}_blocks_#{nodename}"
-				puts "graph_title Blocks sec - Controller #{crtlid} - Port #{portname}"
-				puts "graph_category Nexsan"
-				puts "graph_vlabel Blocks sec"
 				portdata = node.parent
 				portdata.find('.//read_blocks').each do |node|
 					if portname == node.parent['name']
 						puts "read_blocks_#{nodename}.label Read blocks sec"
 						puts "read_blocks_#{nodename}.draw LINE1"
 						puts "read_blocks_#{nodename}.type COUNTER"
+						puts "read_blocks_#{nodename}.graph no"
 					end
 				end
 	
@@ -272,13 +284,14 @@ if ARGV[0] == "config"
 						puts "write_blocks_#{nodename}.label Write blocks sec"
 						puts "write_blocks_#{nodename}.draw LINE1"
 						puts "write_blocks_#{nodename}.type COUNTER"
+						puts "write_blocks_#{nodename}.negative read_blocks_#{nodename}"
 	                                end
 	
 	                        end
-	                        puts ""
 	
 	                end
 	        end
+		puts ""
 	end
 
 
@@ -375,6 +388,8 @@ puts ""
 # Port stats - mbytes
 doc.find('//nexsan_op_status/nexsan_perf_status/controller').each do |node|
 	crtlid = node['id']
+	puts "multigraph nexsan_portstats_mbytes_crtl#{crtlid}"
+
 	doc.find('//nexsan_op_status/nexsan_perf_status/controller/port').each do |node|
 		if crtlid == node.parent['id']
 			portname = node['name']
@@ -383,7 +398,6 @@ doc.find('//nexsan_op_status/nexsan_perf_status/controller').each do |node|
 			nodename = nodename.gsub!('__', '_')
 			portdata = node.parent
 
-			puts "multigraph nexsan_portstats_crtl#{crtlid}_mbytes_#{nodename}"
 
 			portdata.find('.//read_mbytes_per_sec').each do |node|
 				if portname == node.parent['name']
@@ -397,15 +411,16 @@ doc.find('//nexsan_op_status/nexsan_perf_status/controller').each do |node|
                                 end
 
                         end
-                        puts ""
 
                 end
         end
+	puts ""
 end
 
 # Port stats - ios
 doc.find('//nexsan_op_status/nexsan_perf_status/controller').each do |node|
 	crtlid = node['id']
+	puts "multigraph nexsan_portstats_ios_crtl#{crtlid}"
 	doc.find('//nexsan_op_status/nexsan_perf_status/controller/port').each do |node|
 		if crtlid == node.parent['id']
 			portname = node['name']
@@ -413,7 +428,6 @@ doc.find('//nexsan_op_status/nexsan_perf_status/controller').each do |node|
 			nodename = nodename.gsub!('-', '')
 			nodename = nodename.gsub!('__', '_')
 
-			puts "multigraph nexsan_portstats_crtl#{crtlid}_ios_#{nodename}"
 
 			portdata = node.parent
 			portdata.find('.//read_ios').each do |node|
@@ -428,15 +442,17 @@ doc.find('//nexsan_op_status/nexsan_perf_status/controller').each do |node|
                                 end
 
                         end
-                        puts ""
 
                 end
         end
+        puts ""
 end
 
 # Port stats - blocks
 doc.find('//nexsan_op_status/nexsan_perf_status/controller').each do |node|
 	crtlid = node['id']
+	puts "multigraph nexsan_portstats_blocks_crtl#{crtlid}"
+
 	doc.find('//nexsan_op_status/nexsan_perf_status/controller/port').each do |node|
 		if crtlid == node.parent['id']
 			portname = node['name']
@@ -444,7 +460,6 @@ doc.find('//nexsan_op_status/nexsan_perf_status/controller').each do |node|
 			nodename = nodename.gsub!('-', '')
 			nodename = nodename.gsub!('__', '_')
 
-			puts "multigraph nexsan_portstats_crtl#{crtlid}_blocks_#{nodename}"
 
 			portdata = node.parent
 			portdata.find('.//read_blocks').each do |node|
@@ -459,9 +474,9 @@ doc.find('//nexsan_op_status/nexsan_perf_status/controller').each do |node|
                                 end
 
                         end
-                        puts ""
 
                 end
         end
+	puts ""
 end
 
