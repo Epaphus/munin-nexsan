@@ -3,7 +3,7 @@ require 'rubygems'
 require 'xml/libxml'
 require 'net/http'
 
-# Ver 1.11
+# Ver 1.12
 # 28 Aug 2012
 # David Wilkinson - C4L
 
@@ -232,7 +232,7 @@ if ARGV[0] == "config"
 				portdata = node.parent
 				portdata.find('.//read_ios').each do |node|
 					if portname == node.parent['name']
-						puts "read_ios_#{nodename}.label Read IO sec"
+						puts "read_ios_#{nodename}.label #{portname}"
 						puts "read_ios_#{nodename}.draw LINE1"
 						puts "read_ios_#{nodename}.type COUNTER"
 						puts "read_ios_#{nodename}.graph no"
@@ -241,7 +241,7 @@ if ARGV[0] == "config"
 	
 				portdata.find('.//write_ios').each do |node|
 					if portname == node.parent['name']
-						puts "write_ios_#{nodename}.label Write IO sec"
+						puts "write_ios_#{nodename}.label #{portname}"
 						puts "write_ios_#{nodename}.draw LINE1"
 						puts "write_ios_#{nodename}.type COUNTER"
 						puts "write_ios_#{nodename}.negative read_ios_#{nodename}"
@@ -272,7 +272,7 @@ if ARGV[0] == "config"
 				portdata = node.parent
 				portdata.find('.//read_blocks').each do |node|
 					if portname == node.parent['name']
-						puts "read_blocks_#{nodename}.label Read blocks sec"
+						puts "read_blocks_#{nodename}.label #{portname}"
 						puts "read_blocks_#{nodename}.draw LINE1"
 						puts "read_blocks_#{nodename}.type COUNTER"
 						puts "read_blocks_#{nodename}.graph no"
@@ -281,7 +281,7 @@ if ARGV[0] == "config"
 	
 				portdata.find('.//write_blocks').each do |node|
 					if portname == node.parent['name']
-						puts "write_blocks_#{nodename}.label Write blocks sec"
+						puts "write_blocks_#{nodename}.label #{portname}"
 						puts "write_blocks_#{nodename}.draw LINE1"
 						puts "write_blocks_#{nodename}.type COUNTER"
 						puts "write_blocks_#{nodename}.negative read_blocks_#{nodename}"

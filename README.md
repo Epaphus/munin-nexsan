@@ -45,5 +45,5 @@ The plugin currently gets the following information
 Still To Do
 ------------
 
-1) Get the maid stats from the nexsan
-2) Tidy up the code a bit
+1. Get the maid stats from the nexsan
+2. Tidy up the code a bit
