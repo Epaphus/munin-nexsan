@@ -2,7 +2,9 @@ munin-nexsan
 ============
 
 A munin plugin for a Nexsan SAN
+
 Created from the XML output from a Nexsan E60
+
 
 Requires Ruby and the libxml-ruby gem
 
@@ -19,12 +21,14 @@ Munin config
 	env.password password
 
 	Optional
-	# Port used
-	env.port 80
+	# Port used - Default port 80
+	env.port 443
+	# Enable SSL - Default false
+	env.usessl true
 	# Time to wait before HTTP request times out
-	env.timeout
+	env.timeout 30
 	# Page to request, should never change unless Nexsan change the location of the XML page.
-	env.request
+	env.request /admin/opstats.asp
 
 
 data.xml - Example data to work with

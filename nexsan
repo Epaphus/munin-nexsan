@@ -3,7 +3,7 @@ require 'rubygems'
 require 'xml/libxml'
 require 'net/http'
 
-# Ver 1.12
+# Ver 1.2
 # 28 Aug 2012
 # David Wilkinson - C4L
 
@@ -13,20 +13,35 @@ require 'net/http'
 @user = ENV.member?('user') ? ENV['user']: "ADMIN"
 @password = ENV.member?('password') ? ENV['password']: "password"
 @timeout = ENV.member?('timeout') ? ENV['timeout']: 30
+@usessl = ENV.member?('usessl') ? ENV['timeout']: 'false'
 
 # http request
 def getstat()
-   Net::HTTP.start(@host, @port) do |http|
-        http.open_timeout = @timeout
-       req = Net::HTTP::Get.new(@request)
-        req.basic_auth @user, @password
-        response = http.request(req)
-        response.value()
-    return response.body
-    end rescue begin
-	puts "Something wrong with HTTP request"
-        return false
-    end
+        if @usessl == "true"
+                Net::HTTP.start(@host, @port, :use_ssl => true, :verify_mode => OpenSSL::SSL::VERIFY_NONE) do |http|
+                http.open_timeout = @timeout
+                req = Net::HTTP::Get.new(@request)
+                req.basic_auth @user, @password
+                response = http.request(req)
+                response.value()
+                return response.body
+                end rescue begin
+                        puts "Something wrong with HTTP request"
+                return false
+                end
+        else
+                Net::HTTP.start(@host, @port) do |http|
+                http.open_timeout = @timeout
+                req = Net::HTTP::Get.new(@request)
+                req.basic_auth @user, @password
+                response = http.request(req)
+                response.value()
+                return response.body
+                end rescue begin
+                        puts "Something wrong with HTTP request"
+                return false
+                end
+        end
 end
 
 begin
