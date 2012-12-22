@@ -1,3 +1,4 @@
+Verson 1.3 - Added AutoMAID stats
 Verson 1.2 - Added SSL option for SSL enabled Nexsans
 Verson 1.12 - Corrected graph labels on combined port stats
 Verson 1.11 - Combined the ports per controller to reduce the number of graphs displayed which makes things a bit nicer
