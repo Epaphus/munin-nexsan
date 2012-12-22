@@ -1,11 +1,11 @@
-#!/usr/bin/env ruby
+#!/usr/bin/env /usr/local/bin/ruby
 require 'rubygems'
 require 'xml/libxml'
 require 'net/http'
 
-# Ver 1.2
-# 28 Aug 2012
-# David Wilkinson - C4L
+# Ver 1.3
+# 22 Dec 2012
+# David Wilkinson
 
 @host = ENV.member?('host') ? ENV['host']: "127.0.0.1"
 @port = ENV.member?('port') ? ENV['port']: 80
@@ -309,8 +309,27 @@ if ARGV[0] == "config"
 		puts ""
 	end
 
-
-
+  doc.find('//nexsan_op_status/nexsan_maid_stats/maid_group').each do |node|
+    arrayname = node['name']
+    # Clean up array name
+    arrayname = arrayname.tr('^A-Za-z0-9', '')
+    puts "multigraph nexsan_maid_#{arrayname}"
+    puts "graph_title AutoMAID Statistics - #{arrayname}"
+    puts "graph_category Nexsan"
+    puts "graph_vlabel Percent"
+     
+    puts "active_#{arrayname}.label Active"
+    puts "active_#{arrayname}.draw LINE1"
+    puts "idle_#{arrayname}.label  Idle"
+    puts "idle_#{arrayname}.draw LINE1"
+    puts "slow_#{arrayname}.label  Slow"
+    puts "slow_#{arrayname}.draw LINE1"
+    puts "stopped_#{arrayname}.label Stopped"
+    puts "stopped_#{arrayname}.draw LINE1"
+    puts "off_#{arrayname}.label Off"
+    puts "off_#{arrayname}.draw LINE1"
+    puts ""
+  end
 
 
 
@@ -494,4 +513,21 @@ doc.find('//nexsan_op_status/nexsan_perf_status/controller').each do |node|
         end
 	puts ""
 end
+
+
+#Automaid stats
+doc.find('//nexsan_op_status/nexsan_maid_stats/maid_group').each do |node|
+  arrayname = node['name']
+  # Clean up array name 
+  arrayname = arrayname.tr('^A-Za-z0-9', '')
+  puts "multigraph nexsan_maid_#{arrayname}"  
+  puts "active_#{arrayname}.value #{node.find('active_percent').to_a.first.content}"
+  puts "idle_#{arrayname}.value #{node.find('idle_percent').to_a.first.content}"
+  puts "slow_#{arrayname}.value #{node.find('slow_percent').to_a.first.content}"
+  puts "stopped_#{arrayname}.value #{node.find('stopped_percent').to_a.first.content}"
+  puts "off_#{arrayname}.value #{node.find('off_percent').to_a.first.content}"
+  puts ""
+  
+
+end 
 

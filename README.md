@@ -44,10 +44,10 @@ The plugin currently gets the following information
 * Front panel fan speeds
 * Array loads
 * Port stats - MB/sec - IO/sec - Blocks/sec
+* AutoMAID stats - per array and total
 
 
 Still To Do
 ------------
 
-1. Get the maid stats from the nexsan
-2. Tidy up the code a bit
+1. Tidy up the code a bit
